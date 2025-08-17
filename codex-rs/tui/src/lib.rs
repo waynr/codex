@@ -116,7 +116,7 @@ pub async fn run_main(
         codex_linux_sandbox_exe,
         base_instructions: None,
         include_plan_tool: Some(true),
-        include_apply_patch_tool: None,
+        include_apply_patch_tool: Some(true),
         disable_response_storage: cli.oss.then_some(true),
         show_raw_agent_reasoning: cli.oss.then_some(true),
     };

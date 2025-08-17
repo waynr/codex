@@ -672,7 +672,7 @@ impl Config {
 
             experimental_resume,
             include_plan_tool: include_plan_tool.unwrap_or(false),
-            include_apply_patch_tool: include_apply_patch_tool_val,
+            include_apply_patch_tool: true,
             internal_originator: cfg.internal_originator,
         };
         Ok(config)
