@@ -79,6 +79,9 @@ pub struct ModelProviderInfo {
     /// Whether this provider requires some form of standard authentication (API key, ChatGPT token).
     #[serde(default)]
     pub requires_openai_auth: bool,
+
+    /// Whether this model should be told how to use the the apply_patch tool.
+    pub include_apply_patch_tool: Option<bool>,
 }
 
 impl ModelProviderInfo {
@@ -273,6 +276,7 @@ pub fn built_in_model_providers() -> HashMap<String, ModelProviderInfo> {
                 stream_max_retries: None,
                 stream_idle_timeout_ms: None,
                 requires_openai_auth: true,
+                include_apply_patch_tool: None,
             },
         ),
         (BUILT_IN_OSS_MODEL_PROVIDER_ID, create_oss_provider()),
@@ -317,6 +321,7 @@ pub fn create_oss_provider_with_base_url(base_url: &str) -> ModelProviderInfo {
         stream_max_retries: None,
         stream_idle_timeout_ms: None,
         requires_openai_auth: false,
+        include_apply_patch_tool: None,
     }
 }
 

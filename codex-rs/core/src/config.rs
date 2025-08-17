@@ -615,8 +615,10 @@ impl Config {
             Self::get_base_instructions(experimental_instructions_path, &resolved_cwd)?;
         let base_instructions = base_instructions.or(file_base_instructions);
 
-        let include_apply_patch_tool_val =
-            include_apply_patch_tool.unwrap_or(model_family.uses_apply_patch_tool);
+        let include_apply_patch_tool_val = model_provider
+            .include_apply_patch_tool
+            .or(include_apply_patch_tool)
+            .unwrap_or(model_family.uses_apply_patch_tool);
 
         let config = Self {
             model,
