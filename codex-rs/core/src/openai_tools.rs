@@ -539,9 +539,7 @@ pub(crate) fn get_openai_tools(
         tools.push(PLAN_TOOL.clone());
     }
 
-    if config.apply_patch_tool {
-        tools.push(create_apply_patch_tool());
-    }
+    tools.push(create_apply_patch_tool());
 
     if let Some(mcp_tools) = mcp_tools {
         for (name, tool) in mcp_tools {
