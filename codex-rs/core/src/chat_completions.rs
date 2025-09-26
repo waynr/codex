@@ -35,6 +35,7 @@ use tokio::sync::mpsc;
 use tokio::time::timeout;
 use tracing::debug;
 use tracing::trace;
+use tracing::warn;
 
 /// Implementation for the classic Chat Completions API.
 pub(crate) async fn stream_chat_completions(
@@ -335,7 +336,7 @@ pub(crate) async fn stream_chat_completions(
         "tools": tools_json,
     });
 
-    debug!(
+    trace!(
         "POST to {}: {}",
         provider.get_full_url(&None),
         serde_json::to_string_pretty(&payload).unwrap_or_default()
@@ -522,13 +523,19 @@ async fn process_chat_sse<S>(
 
         let sse = match response {
             Ok(Some(Ok(ev))) => ev,
+            // Ok(Some(Ok(ev))) => {
+            //     debug!(event_name = ev.event, "received SSE event");
+            //     ev
+            // }
             Ok(Some(Err(e))) => {
+                debug!(error = ?e, "received SSE stream error");
                 let _ = tx_event
                     .send(Err(CodexErr::Stream(e.to_string(), None)))
                     .await;
                 return;
             }
             Ok(None) => {
+                debug!("SSE stream closed");
                 // Stream closed gracefully – emit Completed with dummy id.
                 let _ = tx_event
                     .send(Ok(ResponseEvent::Completed {
@@ -573,10 +580,17 @@ async fn process_chat_sse<S>(
         // Parse JSON chunk
         let chunk: serde_json::Value = match serde_json::from_str(&sse.data) {
             Ok(v) => v,
-            Err(_) => continue,
+            Err(e) => {
+                warn!(error = ?e, "received SSE error response");
+                continue;
+            }
         };
-        trace!("chat_completions received SSE chunk: {chunk:?}");
 
+        if let Some(error) = chunk.get("error") {
+            warn!(?error, "received SSE error response");
+        } else {
+            debug!(?chunk, "received SSE chunk");
+        }
         let choice_opt = chunk.get("choices").and_then(|c| c.get(0));
 
         if let Some(choice) = choice_opt {
